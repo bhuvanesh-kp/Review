@@ -15,7 +15,7 @@ A full-stack platform for discovering restaurants, rating and reviewing them, sh
 ## Tech stack
 | Layer | Technology |
 |---|---|
-| Backend | Java 21, Spring Boot 4.1, Gradle (Groovy DSL), Spring Data JPA, Spring Security (JWT), Flyway, Spring Data Elasticsearch, springdoc-openapi |
+| Backend | Java 21, Spring Boot 4.1, Gradle (Groovy DSL), Spring Data JPA, Spring Security (JWT), Liquibase, Spring Data Elasticsearch, springdoc-openapi |
 | Database | MySQL 8.4 (source of truth) |
 | Search | Elasticsearch 9 |
 | Analytics | Kibana 9 |
@@ -69,6 +69,24 @@ docker compose logs -f kibana
 docker compose down          # stop (keeps data)
 docker compose down -v       # stop AND delete all data volumes
 ```
+
+### Database initialization
+Database setup happens in three layers:
+
+| When | What | Where |
+|---|---|---|
+| First start of an empty `mysql_data` volume | Creates the database (utf8mb4) if missing and grants the app user access | `docker/mysql/init/01-create-database.sh` |
+| Every `docker compose up` | One-shot `liquibase` service waits for MySQL to be healthy, applies pending changesets, then exits | `backend/src/main/resources/db/changelog/` |
+| Every app start | `createDatabaseIfNotExist=true` recreates a missing database; Spring Boot's Liquibase applies pending changesets | `application.yml` |
+
+The compose service and the app use the same changelog, so whichever runs second reports `Run: 0`.
+
+```bash
+docker compose up liquibase  # re-apply / check the schema on demand
+docker compose logs liquibase
+```
+
+MySQL init scripts only run on a fresh volume. To re-run them, use `docker compose down -v`, which **deletes all data**.
 
 - Elasticsearch security is **disabled for local development only**.
 - Kibana starts only after Elasticsearch reports healthy, so its first start can take a minute or two.

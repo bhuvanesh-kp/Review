@@ -1,4 +1,4 @@
-# Infrastructure for local development: MySQL, Elasticsearch, Kibana.
+# Infrastructure for local development: MySQL (+ Liquibase schema init), Elasticsearch, Kibana.
 # Usage: cp .env.example .env && docker compose up -d
 name: restaurant-review
 
@@ -20,12 +20,44 @@ services:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      # Runs only when mysql_data is empty: creates the database and grants the app user
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
+    networks:
+      - rr-network
+
+  # One-shot: applies the Liquibase changelog (the same files the app uses) once MySQL is healthy, then exits.
+  liquibase:
+    image: liquibase/liquibase:${LIQUIBASE_VERSION:-5.0.4}
+    container_name: rr-liquibase
+    restart: "no"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    # The image ships without the (GPL) MySQL driver. Install it with lpm only if missing
+    # (the image's INSTALL_MYSQL switch fails when the container is re-run), then use the stock entrypoint.
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        ls /liquibase/lib/mysql-connector-*.jar > /dev/null 2>&1 || lpm add mysql --global
+        exec /liquibase/docker-entrypoint.sh "$$@"
+      - --
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-restaurant_review}?createDatabaseIfNotExist=true
+      LIQUIBASE_COMMAND_USERNAME: ${MYSQL_USER:-rr_user}
+      LIQUIBASE_COMMAND_PASSWORD: ${MYSQL_PASSWORD:-rr_pass}
+      # Same relative path as the app's classpath, so both record identical changeset file names
+      LIQUIBASE_SEARCH_PATH: /liquibase/changelog
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: db/changelog/db.changelog-master.yaml
+    volumes:
+      - ./backend/src/main/resources/db:/liquibase/changelog/db:ro
+    command: ["update"]
     networks:
       - rr-network
 

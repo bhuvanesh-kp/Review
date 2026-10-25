@@ -21,7 +21,7 @@ A place where diners discover restaurants, read and write honest reviews, see re
 ```mermaid
 flowchart LR
     UI[React + Vite SPA] -->|REST / JWT| API[Spring Boot API]
-    API -->|JPA + Flyway| DB[(MySQL 8)]
+    API -->|JPA + Liquibase| DB[(MySQL 8)]
     API -->|after-commit sync| ES[(Elasticsearch 9)]
     API -->|search queries| ES
     KB[Kibana] --> ES
@@ -67,7 +67,7 @@ Home/Search · Restaurant detail (info, hours, menu, photos, reviews) · Write/E
 ## 10. Non-functional requirements
 - **Security:** JWT, BCrypt, role and ownership checks, upload validation, no secrets in the repo.
 - **Performance:** paginated lists, denormalized rating counters, ES for search.
-- **Quality:** tests with every feature; Flyway-managed schema; docs kept current.
+- **Quality:** tests with every feature; Liquibase-managed schema; docs kept current.
 
 ## 11. Open questions for review
 1. Should an admin approve new restaurants, or can any user add one?

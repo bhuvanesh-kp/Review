@@ -1,5 +1,10 @@
--- V1: initial schema. Mirrors docs/ER-diagram.md. Never edit once applied; add V2+ instead.
+--liquibase formatted sql
 
+-- 001: initial schema. Mirrors docs/ER-diagram.md.
+-- Never edit a changeset once applied; add a new file in changes/ instead.
+
+--changeset rr:001-01-create-users
+--comment: create table users
 CREATE TABLE users (
     id            BIGINT       NOT NULL AUTO_INCREMENT,
     email         VARCHAR(255) NOT NULL,
@@ -13,7 +18,10 @@ CREATE TABLE users (
     PRIMARY KEY (id),
     CONSTRAINT uk_users_email UNIQUE (email)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE users;
 
+--changeset rr:001-02-create-restaurants
+--comment: create table restaurants
 CREATE TABLE restaurants (
     id           BIGINT       NOT NULL AUTO_INCREMENT,
     name         VARCHAR(200) NOT NULL,
@@ -42,14 +50,20 @@ CREATE TABLE restaurants (
     INDEX idx_restaurants_avg_rating (avg_rating),
     INDEX idx_restaurants_created_by (created_by)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE restaurants;
 
+--changeset rr:001-03-create-cuisines
+--comment: create table cuisines
 CREATE TABLE cuisines (
     id   BIGINT      NOT NULL AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT uk_cuisines_name UNIQUE (name)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE cuisines;
 
+--changeset rr:001-04-create-restaurant-cuisines
+--comment: create table restaurant_cuisines
 CREATE TABLE restaurant_cuisines (
     restaurant_id BIGINT NOT NULL,
     cuisine_id    BIGINT NOT NULL,
@@ -58,7 +72,10 @@ CREATE TABLE restaurant_cuisines (
     CONSTRAINT fk_restaurant_cuisines_cuisine FOREIGN KEY (cuisine_id) REFERENCES cuisines (id) ON DELETE CASCADE,
     INDEX idx_restaurant_cuisines_cuisine (cuisine_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE restaurant_cuisines;
 
+--changeset rr:001-05-create-opening-hours
+--comment: create table opening_hours
 CREATE TABLE opening_hours (
     id            BIGINT  NOT NULL AUTO_INCREMENT,
     restaurant_id BIGINT  NOT NULL,
@@ -71,7 +88,10 @@ CREATE TABLE opening_hours (
     CONSTRAINT ck_opening_hours_day CHECK (day_of_week BETWEEN 0 AND 6),
     INDEX idx_opening_hours_restaurant (restaurant_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE opening_hours;
 
+--changeset rr:001-06-create-menu-categories
+--comment: create table menu_categories
 CREATE TABLE menu_categories (
     id            BIGINT       NOT NULL AUTO_INCREMENT,
     restaurant_id BIGINT       NOT NULL,
@@ -81,7 +101,10 @@ CREATE TABLE menu_categories (
     CONSTRAINT fk_menu_categories_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants (id) ON DELETE CASCADE,
     INDEX idx_menu_categories_restaurant (restaurant_id, sort_order)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE menu_categories;
 
+--changeset rr:001-07-create-menu-items
+--comment: create table menu_items
 CREATE TABLE menu_items (
     id          BIGINT         NOT NULL AUTO_INCREMENT,
     category_id BIGINT         NOT NULL,
@@ -95,7 +118,10 @@ CREATE TABLE menu_items (
     CONSTRAINT fk_menu_items_category FOREIGN KEY (category_id) REFERENCES menu_categories (id) ON DELETE CASCADE,
     INDEX idx_menu_items_category (category_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE menu_items;
 
+--changeset rr:001-08-create-reviews
+--comment: create table reviews
 CREATE TABLE reviews (
     id            BIGINT       NOT NULL AUTO_INCREMENT,
     restaurant_id BIGINT       NOT NULL,
@@ -116,7 +142,10 @@ CREATE TABLE reviews (
     INDEX idx_reviews_restaurant_created (restaurant_id, created_at),
     INDEX idx_reviews_user (user_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE reviews;
 
+--changeset rr:001-09-create-review-photos
+--comment: create table review_photos
 CREATE TABLE review_photos (
     id         BIGINT       NOT NULL AUTO_INCREMENT,
     review_id  BIGINT       NOT NULL,
@@ -127,7 +156,10 @@ CREATE TABLE review_photos (
     CONSTRAINT fk_review_photos_review FOREIGN KEY (review_id) REFERENCES reviews (id) ON DELETE CASCADE,
     INDEX idx_review_photos_review (review_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE review_photos;
 
+--changeset rr:001-10-create-restaurant-photos
+--comment: create table restaurant_photos
 CREATE TABLE restaurant_photos (
     id            BIGINT       NOT NULL AUTO_INCREMENT,
     restaurant_id BIGINT       NOT NULL,
@@ -142,7 +174,10 @@ CREATE TABLE restaurant_photos (
     INDEX idx_restaurant_photos_restaurant (restaurant_id),
     INDEX idx_restaurant_photos_uploaded_by (uploaded_by)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE restaurant_photos;
 
+--changeset rr:001-11-create-review-votes
+--comment: create table review_votes
 CREATE TABLE review_votes (
     review_id  BIGINT      NOT NULL,
     user_id    BIGINT      NOT NULL,
@@ -152,7 +187,10 @@ CREATE TABLE review_votes (
     CONSTRAINT fk_review_votes_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     INDEX idx_review_votes_user (user_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE review_votes;
 
+--changeset rr:001-12-create-review-reports
+--comment: create table review_reports
 CREATE TABLE review_reports (
     id          BIGINT      NOT NULL AUTO_INCREMENT,
     review_id   BIGINT      NOT NULL,
@@ -172,3 +210,4 @@ CREATE TABLE review_reports (
     INDEX idx_review_reports_reporter (reporter_id),
     INDEX idx_review_reports_resolved_by (resolved_by)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+--rollback DROP TABLE review_reports;

@@ -9,16 +9,17 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 
 **Steps**
 1. Design the table: columns, keys, constraints, indexes.
-2. Add a Flyway migration `backend/src/main/resources/db/migration/V<n>__<description>.sql`.
+2. Add a Liquibase changeset file `backend/src/main/resources/db/changelog/changes/NNN-<description>.sql` (`--liquibase formatted sql`, one `--changeset rr:NNN-…` per change, each with `--rollback`).
 3. Create the JPA entity in `entities/` (extend `BaseEntity` or `AuditableEntity`). Put any enum it uses in `constants/`.
 4. Create a Spring Data repository in `repository/`.
 5. Update `docs/ER-diagram.md`: the entity block, its relationships, and any constraint notes.
 
-**Files:** `db/migration/*`, `entities/<Entity>.java`, `constants/*`, `repository/<Entity>Repository.java`, `docs/ER-diagram.md`
+**Files:** `db/changelog/changes/*`, `entities/<Entity>.java`, `constants/*`, `repository/<Entity>Repository.java`, `docs/ER-diagram.md`
 
 **Done when**
 - [ ] The app starts with `ddl-auto=validate`
-- [ ] The ER diagram matches the migration
+- [ ] The ER diagram matches the changeset
+- [ ] `docker compose up liquibase` applies it cleanly
 - [ ] Every FK is indexed and unique constraints are defined
 
 ---
@@ -105,7 +106,7 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 **Trigger:** a new report reason, admin action, or moderation rule.
 
 **Steps**
-1. Update the enums (`reason`, `status`) through a migration if they're stored as DB enums.
+1. Update the enums (`reason`, `status`) through a new Liquibase changeset if they're stored as DB enums.
 2. Implement the action in the moderation service. Record `resolved_by` and `resolved_at`.
 3. Hiding or removing a review must recompute the restaurant's rating aggregates and trigger a search re-index.
 4. Expose it under `/api/admin/**` (`ADMIN` only).
@@ -138,7 +139,7 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 - [ ] Follows the layering and package rules in CLAUDE.md
 - [ ] No entities leaked through the API; DTOs validated
 - [ ] Authorization checked on every mutating path
-- [ ] Schema changes go through a new migration, and the ER diagram is updated
+- [ ] Schema changes go through a new Liquibase changeset, and the ER diagram is updated
 - [ ] ES sync handled for searchable data changes
 - [ ] No secrets, no logged personal data
 - [ ] Tests added and passing; build green

@@ -1,6 +1,6 @@
 # ER Diagram
 
-Database: **MySQL 8**. This diagram is the reference for the Flyway migrations. Any schema change must update this file (see [CLAUDE.md](../CLAUDE.md)).
+Database: **MySQL 8**. This diagram is the reference for the Liquibase changesets in `backend/src/main/resources/db/changelog/`. Any schema change must update this file (see [CLAUDE.md](../CLAUDE.md)).
 
 ```mermaid
 erDiagram

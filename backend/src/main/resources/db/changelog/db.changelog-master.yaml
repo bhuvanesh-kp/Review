@@ -1,0 +1,6 @@
+# Master changelog. Used by the app (spring.liquibase.change-log) and the compose `liquibase` service.
+# Add schema changes as new files in changes/ named NNN-<description>.sql; they are applied in filename order.
+databaseChangeLog:
+  - includeAll:
+      path: changes/
+      relativeToChangelogFile: true

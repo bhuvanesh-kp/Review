@@ -6,12 +6,12 @@ These rules apply to Claude and any AI assistant working in this repository. Reu
 A restaurant review platform: restaurants, reviews and ratings, photos, menus, search, and moderation.
 - **Backend:** Spring Boot 4.1 (Java 21 toolchain, Gradle with Groovy DSL) in `backend/`
 - **Frontend:** React 18 + Vite + TypeScript in `frontend/`
-- **Data:** MySQL 8.4 (source of truth), Elasticsearch 9 (search index), Kibana 9 (analytics). Keep the Elasticsearch server major version in step with Spring Boot's ES client.
+- **Data:** MySQL 8.4 (source of truth, schema managed by Liquibase), Elasticsearch 9 (search index), Kibana 9 (analytics). Keep the Elasticsearch server major version in step with Spring Boot's ES client.
 - **Docs:** `docs/PLAN.md` (roadmap) and `docs/ER-diagram.md` (schema)
 
 ## Key commands
 ```bash
-docker compose up -d                 # start MySQL, Elasticsearch, Kibana
+docker compose up -d                 # start MySQL (+ Liquibase schema update), Elasticsearch, Kibana
 cd backend  && ./gradlew bootRun       # run API on :8080 (Windows: gradlew.bat)
 cd backend  && ./gradlew build         # compile + tests (Testcontainers needs Docker)
 cd backend  && ./gradlew test          # tests only
@@ -40,9 +40,12 @@ cd frontend && npm test                # Vitest
 - Photo storage goes through the `StorageService` interface. Don't write to disk directly from other code.
 
 ## Database rules
-- Change the schema **only through a new Flyway migration** (`V<n>__<description>.sql`). **Never edit a migration that has been applied.**
+- Change the schema **only through a new Liquibase changeset file** in `backend/src/main/resources/db/changelog/changes/`, named `NNN-<description>.sql` (formatted SQL; applied in filename order via `includeAll`). **Never edit a changeset that has been applied**; checksums will fail.
+- Give every changeset a unique `rr:NNN-…` id and a `--rollback` statement.
+- The same changelog is applied by the app on startup and by the compose `liquibase` service. Keep the master changelog at `db/changelog/db.changelog-master.yaml` so both record identical file paths.
+- Tables are never created by MySQL init scripts (`docker/mysql/init/` only creates the database and grants access).
 - Every schema change must update `docs/ER-diagram.md` in the same change.
-- Keep `spring.jpa.hibernate.ddl-auto=validate`. Entities must match the migrations.
+- Keep `spring.jpa.hibernate.ddl-auto=validate`. Entities must match the changesets.
 - Name tables and columns in `snake_case`, use plural table names, and give every table a `bigint` surrogate key. Every foreign key gets an index.
 
 ## Coding conventions
