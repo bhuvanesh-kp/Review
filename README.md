@@ -28,7 +28,8 @@ Restaurant-Review/
 ├── README.md            # this file
 ├── CLAUDE.md            # rules for Claude / AI assistants
 ├── AGENT.md             # skills catalog for agents
-├── docker-compose.yml   # mysql, elasticsearch, kibana        (planned)
+├── docker-compose.yml   # mysql, elasticsearch, kibana
+├── .env.example         # environment variables template
 ├── docs/
 │   ├── PLAN.md          # roadmap, API outline, search design
 │   └── ER-diagram.md    # database ER diagram (Mermaid)
@@ -42,10 +43,11 @@ Restaurant-Review/
 - Docker Desktop
 
 ## Quick start
-> These steps apply once the base template is in place.
+> Step 1 works today. Steps 2–3 apply once the base template is in place.
 
 ```bash
-# 1. Start infrastructure
+# 1. Configure and start infrastructure
+cp .env.example .env
 docker compose up -d
 
 # 2. Run the backend (http://localhost:8080)
@@ -57,6 +59,20 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## Infrastructure
+`docker-compose.yml` runs MySQL 8.4, Elasticsearch 8.15 and Kibana 8.15. Data persists in the named volumes `mysql_data` and `es_data`.
+
+```bash
+docker compose ps            # status and health of each service
+docker compose logs -f kibana
+docker compose down          # stop (keeps data)
+docker compose down -v       # stop AND delete all data volumes
+```
+
+- Elasticsearch security is **disabled for local development only**.
+- Kibana starts only after Elasticsearch reports healthy, so its first start can take a minute or two.
+- **Windows/WSL2:** give Docker at least 4 GB of memory. If Elasticsearch exits with a `vm.max_map_count` error, run `wsl -d docker-desktop sysctl -w vm.max_map_count=262144`.
 
 ## Service URLs
 | Service | URL |
