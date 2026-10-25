@@ -40,7 +40,7 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 - [ ] Shows up in Swagger UI with correct schemas
 - [ ] Invalid input returns 400 with an `ApiError`; unauthorized calls return 401/403
 - [ ] List endpoints are paginated
-- [ ] Tests pass (`./mvnw verify`)
+- [ ] Tests pass (`./gradlew build`)
 
 ---
 
@@ -127,7 +127,7 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 - For a bug fix, first write a test that reproduces the bug.
 
 **Done when**
-- [ ] `./mvnw verify` and `npm test` pass
+- [ ] `./gradlew build` and `npm test` pass
 - [ ] The new behavior and its edge cases (validation, authorization) are covered
 
 ---

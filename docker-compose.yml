@@ -30,7 +30,7 @@ services:
       - rr-network
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.15.3}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-9.3.3}
     container_name: rr-elasticsearch
     restart: unless-stopped
     environment:
@@ -58,7 +58,7 @@ services:
       - rr-network
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-8.15.3}
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-9.3.3}
     container_name: rr-kibana
     restart: unless-stopped
     environment:

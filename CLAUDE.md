@@ -4,16 +4,17 @@ These rules apply to Claude and any AI assistant working in this repository. Reu
 
 ## Project summary
 A restaurant review platform: restaurants, reviews and ratings, photos, menus, search, and moderation.
-- **Backend:** Spring Boot 3 (Java 21, Maven) in `backend/`
+- **Backend:** Spring Boot 4.1 (Java 21 toolchain, Gradle with Groovy DSL) in `backend/`
 - **Frontend:** React 18 + Vite + TypeScript in `frontend/`
-- **Data:** MySQL 8 (source of truth), Elasticsearch 8 (search index), Kibana 8 (analytics)
+- **Data:** MySQL 8.4 (source of truth), Elasticsearch 9 (search index), Kibana 9 (analytics). Keep the Elasticsearch server major version in step with Spring Boot's ES client.
 - **Docs:** `docs/PLAN.md` (roadmap) and `docs/ER-diagram.md` (schema)
 
 ## Key commands
 ```bash
 docker compose up -d                 # start MySQL, Elasticsearch, Kibana
-cd backend  && ./mvnw spring-boot:run  # run API on :8080
-cd backend  && ./mvnw verify           # build + tests
+cd backend  && ./gradlew bootRun       # run API on :8080 (Windows: gradlew.bat)
+cd backend  && ./gradlew build         # compile + tests (Testcontainers needs Docker)
+cd backend  && ./gradlew test          # tests only
 cd frontend && npm run dev             # run UI on :5173
 cd frontend && npm run build           # type-check + build
 cd frontend && npm test                # Vitest

@@ -22,7 +22,7 @@ A place where diners discover restaurants, read and write honest reviews, see re
 flowchart LR
     UI[React + Vite SPA] -->|REST / JWT| API[Spring Boot API]
     API -->|JPA + Flyway| DB[(MySQL 8)]
-    API -->|after-commit sync| ES[(Elasticsearch 8)]
+    API -->|after-commit sync| ES[(Elasticsearch 9)]
     API -->|search queries| ES
     KB[Kibana] --> ES
     API --> FS[[StorageService<br/>local disk → S3 later]]

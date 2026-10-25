@@ -15,10 +15,10 @@ A full-stack platform for discovering restaurants, rating and reviewing them, sh
 ## Tech stack
 | Layer | Technology |
 |---|---|
-| Backend | Java 21, Spring Boot 3, Spring Data JPA, Spring Security (JWT), Flyway, Spring Data Elasticsearch |
-| Database | MySQL 8 (source of truth) |
-| Search | Elasticsearch 8 |
-| Analytics | Kibana 8 |
+| Backend | Java 21, Spring Boot 4.1, Gradle (Groovy DSL), Spring Data JPA, Spring Security (JWT), Flyway, Spring Data Elasticsearch, springdoc-openapi |
+| Database | MySQL 8.4 (source of truth) |
+| Search | Elasticsearch 9 |
+| Analytics | Kibana 9 |
 | Frontend | React 18, Vite, TypeScript, React Router, TanStack Query, Axios |
 | Infra | Docker Compose (MySQL, Elasticsearch, Kibana) |
 
@@ -33,17 +33,17 @@ Restaurant-Review/
 ├── docs/
 │   ├── PLAN.md          # roadmap, API outline, search design
 │   └── ER-diagram.md    # database ER diagram (Mermaid)
-├── backend/             # Spring Boot API                      (planned)
+├── backend/             # Spring Boot API (Gradle)
 └── frontend/            # React + Vite app                     (planned)
 ```
 
 ## Prerequisites
-- JDK 21
+- JDK 17+ to launch Gradle (the build compiles with a JDK 21 toolchain, downloaded automatically if missing)
 - Node.js 20+
 - Docker Desktop
 
 ## Quick start
-> Step 1 works today. Steps 2–3 apply once the base template is in place.
+> Steps 1–2 work today. Step 3 applies once the frontend exists.
 
 ```bash
 # 1. Configure and start infrastructure
@@ -52,7 +52,7 @@ docker compose up -d
 
 # 2. Run the backend (http://localhost:8080)
 cd backend
-./mvnw spring-boot:run
+./gradlew bootRun        # Windows: gradlew.bat bootRun
 
 # 3. Run the frontend (http://localhost:5173)
 cd frontend
@@ -61,7 +61,7 @@ npm run dev
 ```
 
 ## Infrastructure
-`docker-compose.yml` runs MySQL 8.4, Elasticsearch 8.15 and Kibana 8.15. Data persists in the named volumes `mysql_data` and `es_data`.
+`docker-compose.yml` runs MySQL 8.4, Elasticsearch 9.3 and Kibana 9.3. Data persists in the named volumes `mysql_data` and `es_data`.
 
 ```bash
 docker compose ps            # status and health of each service
