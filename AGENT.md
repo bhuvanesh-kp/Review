@@ -10,11 +10,11 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 **Steps**
 1. Design the table: columns, keys, constraints, indexes.
 2. Add a Flyway migration `backend/src/main/resources/db/migration/V<n>__<description>.sql`.
-3. Create the JPA entity in `com.restaurantreview.<feature>` (extend `BaseEntity` where it applies).
-4. Create a Spring Data repository.
+3. Create the JPA entity in `entities/` (extend `BaseEntity` or `AuditableEntity`). Put any enum it uses in `constants/`.
+4. Create a Spring Data repository in `repository/`.
 5. Update `docs/ER-diagram.md`: the entity block, its relationships, and any constraint notes.
 
-**Files:** `db/migration/*`, `<feature>/<Entity>.java`, `<feature>/<Entity>Repository.java`, `docs/ER-diagram.md`
+**Files:** `db/migration/*`, `entities/<Entity>.java`, `constants/*`, `repository/<Entity>Repository.java`, `docs/ER-diagram.md`
 
 **Done when**
 - [ ] The app starts with `ddl-auto=validate`
@@ -27,14 +27,14 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 **Trigger:** a new REST operation is needed.
 
 **Steps**
-1. Define request/response DTOs (records) with Bean Validation.
-2. Implement the logic in the feature's service, with `@Transactional` where needed.
+1. Define request/response DTOs (records) with Bean Validation in `models/`.
+2. Implement the logic in a service in `service/`, with `@Transactional` where needed.
 3. Add the controller method. Use the `/api/...` path convention and `/api/admin/...` for admin operations.
 4. Enforce authorization (role and ownership).
 5. Map new error cases in `GlobalExceptionHandler`.
 6. Write tests: a service unit test and a controller test (`@WebMvcTest` or an integration test).
 
-**Files:** `<feature>/dto/*`, `<feature>/*Service.java`, `<feature>/*Controller.java`, tests
+**Files:** `models/*`, `service/*Service.java`, `controller/*Controller.java`, tests
 
 **Done when**
 - [ ] Shows up in Swagger UI with correct schemas
@@ -73,7 +73,7 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 4. Update the query building in the search service (filters, sorting, geo distance).
 5. If the mapping changed, run the full reindex (`POST /api/admin/search/reindex`).
 
-**Files:** `search/*`, the services that publish events
+**Files:** `entities/RestaurantDocument.java`, `repository/RestaurantSearchRepository.java`, `service/IndexSyncListener.java`, `service/*SearchService.java`, the services that publish events
 
 **Done when**
 - [ ] A create/update/review change appears in search results
@@ -92,7 +92,7 @@ Reusable, step-by-step recipes for agents working on this repository. Always fol
 4. Check that the uploader may attach the photo to that restaurant/review.
 5. On the frontend, show a preview and upload progress.
 
-**Files:** `photo/*`, the related controller, frontend upload component
+**Files:** `service/StorageService.java` (+ implementation), `service/*PhotoService.java`, the related controller in `controller/`, frontend upload component
 
 **Done when**
 - [ ] Invalid type or size is rejected with a clear error

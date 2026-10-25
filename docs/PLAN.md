@@ -28,7 +28,7 @@ flowchart LR
     API --> FS[[StorageService<br/>local disk → S3 later]]
 ```
 - MySQL is the source of truth; Elasticsearch is a derived, rebuildable index.
-- Feature-based backend packages: `user`, `restaurant`, `menu`, `review`, `photo`, `moderation`, `search`.
+- Layer-based (MVC) backend packages: `controller`, `service`, `repository`, `entities`, `models`, `constants`, `utils`, `config`.
 
 ## 5. Data model
 See [ER-diagram.md](ER-diagram.md).

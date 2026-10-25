@@ -21,10 +21,21 @@ cd frontend && npm test                # Vitest
 ```
 
 ## Architecture rules
-- Use feature-based packages under `com.restaurantreview.<feature>` (`user`, `restaurant`, `menu`, `review`, `photo`, `moderation`, `search`). Shared code goes in `common`, `config` and `security`.
+- Use **layer-based (MVC) packages** under `com.restaurantreview`. Package names are flat; don't add feature sub-packages.
+
+  | Package | Contents |
+  |---|---|
+  | `controller` | REST controllers and the `GlobalExceptionHandler` |
+  | `service` | business logic, transactions, entity ↔ model mapping, event publishing and the after-commit search index listeners |
+  | `repository` | Spring Data JPA and Elasticsearch repositories (interfaces only) |
+  | `entities` | JPA entities (plus `BaseEntity`/`AuditableEntity`) and Elasticsearch documents |
+  | `models` | request/response DTOs (Java records), `ApiError` |
+  | `constants` | enums and shared constant values |
+  | `utils` | stateless helpers (e.g. slug generation) |
+  | `config` | Spring configuration: security, JWT filter, CORS, Elasticsearch |
 - Keep the layering **controller → service → repository**. Controllers hold no business logic; repositories hold no business rules.
-- Use **DTOs at the API boundary**. Never return JPA entities from controllers.
-- **MySQL is the source of truth.** Elasticsearch is a derived index: update it only from `@TransactionalEventListener(phase = AFTER_COMMIT)` listeners in the `search` package, and keep a full reindex path working.
+- Use **DTOs (`models`) at the API boundary**. Never return JPA entities from controllers.
+- **MySQL is the source of truth.** Elasticsearch is a derived index: update it only from `@TransactionalEventListener(phase = AFTER_COMMIT)` listeners in `service`, and keep a full reindex path working.
 - Denormalized counters (`avg_rating`, `review_count`, `helpful_count`) are updated in the service layer, in the same transaction as the change that affects them.
 - Photo storage goes through the `StorageService` interface. Don't write to disk directly from other code.
 
