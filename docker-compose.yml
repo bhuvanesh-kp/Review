@@ -23,7 +23,9 @@ services:
       # Runs only when mysql_data is empty: creates the database and grants the app user
       - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      # TCP (not the socket) so the entrypoint's temporary, socket-only init server never counts as healthy;
+      # logging in as the app user to the app database also proves the init script's grants are in place.
+      test: ["CMD-SHELL", "mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" -e 'SELECT 1' \"$$MYSQL_DATABASE\" > /dev/null 2>&1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -49,6 +51,8 @@ services:
         exec /liquibase/docker-entrypoint.sh "$$@"
       - --
     environment:
+      # "mysql" is the service name on the compose network (localhost here would be this container).
+      # The app on the host reaches the same server via the published port: jdbc:mysql://localhost:3306/...
       LIQUIBASE_COMMAND_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-restaurant_review}?createDatabaseIfNotExist=true
       LIQUIBASE_COMMAND_USERNAME: ${MYSQL_USER:-rr_user}
       LIQUIBASE_COMMAND_PASSWORD: ${MYSQL_PASSWORD:-rr_pass}

@@ -79,7 +79,7 @@ Database setup happens in three layers:
 | Every `docker compose up` | One-shot `liquibase` service waits for MySQL to be healthy, applies pending changesets, then exits | `backend/src/main/resources/db/changelog/` |
 | Every app start | `createDatabaseIfNotExist=true` recreates a missing database; Spring Boot's Liquibase applies pending changesets | `application.yml` |
 
-The compose service and the app use the same changelog, so whichever runs second reports `Run: 0`.
+The compose service and the app use the same changelog, so whichever runs second reports `Run: 0`. Both reach the same MySQL server through different addresses. The `liquibase` container uses `jdbc:mysql://mysql:3306/...`, since `mysql` is the service name on the compose network. The app on your machine uses `jdbc:mysql://localhost:3306/...` through the published port.
 
 ```bash
 docker compose up liquibase  # re-apply / check the schema on demand
